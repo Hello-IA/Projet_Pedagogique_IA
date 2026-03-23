@@ -1,3 +1,5 @@
 Comment faire pour que A* et exactement le même conportement que Dikjstra ? (metre une heuristique nulle)
 Comment faire pour que A* et Dikjstra trouve exactement le même cheminent en gardant la même euristique ? (rajouter un ordre totale)
 Pare quelle euristique on peux remplacer l'heuristique actuelle et que constatervous ? (metre la distence euclidiene)
+
+Faire des maps

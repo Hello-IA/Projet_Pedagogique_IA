@@ -13,10 +13,34 @@ algo_actif = "BFS"
 
 score = 0
 pygame.init()
+
+# chargement du sprite pour les murs
+
+
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Éditeur BFS/Dijkstra/A*")
 
 font = pygame.font.SysFont(None, 24)
+
+sprite_eau = pygame.image.load("Tiles\\wather.png").convert_alpha()
+
+# redimensionner à la taille d'une cellule
+sprite_eau = pygame.transform.scale(sprite_eau, (CELL_SIZE, CELL_SIZE))
+
+sprite_grass = pygame.image.load("Tiles\\grass.png").convert_alpha()
+
+# redimensionner à la taille d'une cellule
+sprite_grass = pygame.transform.scale(sprite_grass, (CELL_SIZE, CELL_SIZE))
+
+sprite_montaine = pygame.image.load("Tiles\\montaine.png").convert_alpha()
+
+# redimensionner à la taille d'une cellule
+sprite_montaine = pygame.transform.scale(sprite_montaine, (CELL_SIZE, CELL_SIZE))
+
+sprite_snow = pygame.image.load("Tiles\\snow.png").convert_alpha()
+
+# redimensionner à la taille d'une cellule
+sprite_snow = pygame.transform.scale(sprite_snow, (CELL_SIZE, CELL_SIZE))
 
 # ===== ETAT =====
 grid = [[1 for _ in range(COLS)] for _ in range(ROWS)]
@@ -51,9 +75,9 @@ def get_cell_from_mouse(pos):
 
 # ===== TERRAINS =====
 terrains = [
-    {"name":"Facile", "cost":1, "color":(20,120,255)},   # bleu
-    {"name":"Moyen",  "cost":3, "color":(180,140,50)},   # brun
-    {"name":"Difficile","cost":5,"color":(120,30,30)},   # rouge
+    {"name":"Facile", "cost":1, "sprite":sprite_grass},   # bleu
+    {"name":"Moyen",  "cost":3, "sprite":sprite_montaine},   # brun
+    {"name":"Difficile","cost":5,"sprite":sprite_snow},   # rouge
 ]
 terrain_actif = terrains[0]
 
@@ -157,38 +181,18 @@ while running:
             val = grid[x][y]
             if grid[x][y] == 0:
                 #pygame.draw.rect(screen, (0,0,0), rect)
-                pygame.draw.rect(screen, (40,40,40), rect)
-                pygame.draw.rect(screen, (15,15,15), rect, 1)
+                # affiche le sprite à la place du mur
+                screen.blit(sprite_eau, rect)
             else:
-                base_color = next(t["color"] for t in terrains if t["cost"]==val)
+                terrain = next(t for t in terrains if t["cost"]==val)
                 b = brightness[(x,y)]
                 
-                color = (
-                    min(255, int(base_color[0] * (0.5 + 0.5*b))),
-                    min(255, int(base_color[1] * (0.5 + 0.5*b))),
-                    min(255, int(base_color[2] * (0.5 + 0.5*b))),
-                )
-                # fond principal
-                pygame.draw.rect(screen, color, rect)
+                screen.blit(terrain["sprite"], rect)
+
 
                 # bordure fine
                 pygame.draw.rect(screen, (20,20,20), rect, 1)
 
-                # reflet (ligne fine en haut)
-                pygame.draw.line(
-                    screen,
-                    (255,255,255),
-                    (rect.x+1, rect.y+1),
-                    (rect.x+rect.width-2, rect.y+1)
-                )
-
-                # ombre (ligne fine en bas)
-                pygame.draw.line(
-                    screen,
-                    (0,0,0),
-                    (rect.x+1, rect.y+rect.height-2),
-                    (rect.x+rect.width-2, rect.y+rect.height-2)
-                )
 
             if (x,y) in path_cells:
                 pygame.draw.rect(screen, (255,255,0), rect)
@@ -204,13 +208,22 @@ while running:
         pygame.draw.rect(screen, (255,0,0),
             (goal[1]*CELL_SIZE, goal[0]*CELL_SIZE, CELL_SIZE, CELL_SIZE))
 
-
+    
     # ===== Panneau terrain =====
     for i, t in enumerate(terrains):
         rect = pygame.Rect(10 + i*60, 10, 50, 30)
-        pygame.draw.rect(screen, t["color"], rect)
+        
+        # si un sprite existe, on l'affiche
+        if t["sprite"] is not None:
+            sprite_redim = pygame.transform.scale(t["sprite"], (50, 30))
+            screen.blit(sprite_redim, rect)
+        else:
+            # fallback couleur
+            pygame.draw.rect(screen, t["color"], rect)
+        
+        # bordure si sélectionné
         if t == terrain_actif:
-            pygame.draw.rect(screen, (255,255,255), rect, 3)  # bordure blanche si actif
+            pygame.draw.rect(screen, (255,255,255), rect, 3)
             
     buttons = ["BFS", "DIJKSTRA", "ASTAR"]
 
